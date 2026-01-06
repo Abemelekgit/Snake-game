@@ -75,6 +75,7 @@
       display: grid; place-items: center; color: #7afcff; font-weight: 700; user-select: none;
     }
     .btn:active { background: rgba(38,255,230,0.25); }
+    .btn.pressed { background: rgba(38,255,230,0.25); box-shadow: 0 0 12px rgba(122,252,255,0.7); }
     .btn span { font-size: 18px; }
     .hidden { display: none; }
     @keyframes pulse {
@@ -337,7 +338,12 @@
       dpadButtons.forEach(btn => {
         const dir = btn.dataset.dir;
         ["touchstart", "pointerdown"].forEach(ev => {
-          btn.addEventListener(ev, (e) => { e.preventDefault(); touchHandler(dir); });
+          btn.addEventListener(ev, (e) => {
+            e.preventDefault();
+            btn.classList.add("pressed");
+            setTimeout(() => btn.classList.remove("pressed"), 120);
+            touchHandler(dir);
+          });
         });
       });
 
