@@ -335,6 +335,9 @@
 
       startBtn.addEventListener("click", start);
       window.addEventListener("resize", () => { resize(); draw(); });
+      window.addEventListener("blur", () => {
+        if (loopId && !paused) togglePause();
+      });
 
       // Init
       resize();
