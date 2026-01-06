@@ -312,6 +312,7 @@
       const gameOver = () => {
         clearInterval(loopId);
         lastEl.textContent = score;
+        startBtn.textContent = "Start";
         ctx.fillStyle = "rgba(0,0,0,0.45)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#7afcff";
