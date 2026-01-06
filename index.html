@@ -77,6 +77,12 @@
     .btn:active { background: rgba(38,255,230,0.25); }
     .btn span { font-size: 18px; }
     .hidden { display: none; }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    .pulse { animation: pulse 0.3s ease; }
   </style>
 </head>
 <body>
@@ -212,6 +218,9 @@
           score += 10;
           scoreEl.textContent = score;
           if ("vibrate" in navigator) navigator.vibrate(40);
+          scoreEl.classList.remove("pulse");
+          void scoreEl.offsetWidth;
+          scoreEl.classList.add("pulse");
           if (score > highScore) {
             highScore = score;
             highEl.textContent = highScore;
