@@ -301,6 +301,10 @@
           if (loopId) togglePause();
           return;
         }
+        if (k === "enter") {
+          start();
+          return;
+        }
         if (k === "arrowup" || k === "w") setDirection(0, -1);
         else if (k === "arrowdown" || k === "s") setDirection(0, 1);
         else if (k === "arrowleft" || k === "a") setDirection(-1, 0);
