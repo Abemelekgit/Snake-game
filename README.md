@@ -29,13 +29,11 @@ npx cap open android
 In Android Studio, build and run on a device/emulator. Set `android:usesCleartextTraffic="true"` in `AndroidManifest.xml` if loading from a local dev server.
 
 ## Controls
-- Touch: On-screen D-pad (bottom half)
-- Keyboard: Arrow keys or WASD
+ - Pause/Resume: Space bar (auto-pauses on window blur)
+ - Restart: Enter key or Start button
 
 ## Difficulty
-- Chill: slower
-- Classic: default
-- Hard: faster
+ - Remembers last selected mode across sessions
 
 ## Files
 - `index.html` — all game code (HTML/CSS/JS)
