@@ -120,6 +120,7 @@
       const modeSelect = document.getElementById("modeSelect");
       const dpadButtons = document.querySelectorAll(".btn[data-dir]");
       const HIGH_KEY = "snake_highscore";
+      const MODE_KEY = "snake_mode";
       let highScore = parseInt(localStorage.getItem(HIGH_KEY) || "0", 10);
       highEl.textContent = highScore;
 
@@ -128,6 +129,10 @@
         classic: { speed: 110 },
         hard: { speed: 80 }
       };
+      const savedMode = localStorage.getItem(MODE_KEY);
+      if (savedMode && difficulties[savedMode]) {
+        modeSelect.value = savedMode;
+      }
       let currentMode = modeSelect.value;
 
       let cellSize = 20, cols = 24, rows = 32;
@@ -290,6 +295,7 @@
 
       modeSelect.addEventListener("change", () => {
         currentMode = modeSelect.value;
+        localStorage.setItem(MODE_KEY, currentMode);
         speedMs = difficulties[currentMode]?.speed || difficulties.classic.speed;
         if (loopId) {
           clearInterval(loopId);
