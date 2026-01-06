@@ -86,6 +86,7 @@
       <div class="badge"><span class="label">Score</span><span class="value" id="score">0</span></div>
       <div class="badge"><span class="label">High</span><span class="value" id="high">0</span></div>
       <div class="badge"><span class="label">Length</span><span class="value" id="length">3</span></div>
+      <div class="badge"><span class="label">Last</span><span class="value" id="last">0</span></div>
       <div class="badge">
         <span class="label">Mode</span>
         <select id="modeSelect">
@@ -118,6 +119,7 @@
       const scoreEl = document.getElementById("score");
       const highEl = document.getElementById("high");
       const lengthEl = document.getElementById("length");
+      const lastEl = document.getElementById("last");
       const startBtn = document.getElementById("startBtn");
       const modeSelect = document.getElementById("modeSelect");
       const dpadButtons = document.querySelectorAll(".btn[data-dir]");
@@ -264,6 +266,7 @@
 
       const gameOver = () => {
         clearInterval(loopId);
+        lastEl.textContent = score;
         ctx.fillStyle = "rgba(0,0,0,0.45)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#7afcff";
