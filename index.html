@@ -147,6 +147,7 @@
       let score = 0;
       let loopId = null;
       let speedMs = difficulties[currentMode].speed;
+      let paused = false;
 
       const resize = () => {
         const w = window.innerWidth;
@@ -193,6 +194,7 @@
       };
 
       const tick = () => {
+        if (paused) return;
         dir = { ...nextDir };
         const head = { x: snake[snake.length - 1].x + dir.x, y: snake[snake.length - 1].y + dir.y };
 
@@ -217,6 +219,12 @@
           snake.shift();
         }
         lengthEl.textContent = snake.length;
+        draw();
+      };
+
+      const togglePause = () => {
+        paused = !paused;
+        startBtn.textContent = paused ? "Resume" : "Restart";
         draw();
       };
 
@@ -258,6 +266,7 @@
       const start = () => {
         clearInterval(loopId);
         speedMs = difficulties[currentMode]?.speed || difficulties.classic.speed;
+        paused = false;
         reset();
         draw();
         loopId = setInterval(tick, speedMs);
