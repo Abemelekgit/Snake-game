@@ -371,7 +371,13 @@
         }
       });
 
-      startBtn.addEventListener("click", start);
+      startBtn.addEventListener("click", () => {
+        if (paused && loopId) {
+          togglePause();
+          return;
+        }
+        start();
+      });
       window.addEventListener("resize", () => { resize(); draw(); });
       window.addEventListener("blur", () => {
         if (loopId && !paused) togglePause();
