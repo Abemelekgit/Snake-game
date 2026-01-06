@@ -95,6 +95,7 @@
           <option value="hard">Hard</option>
         </select>
       </div>
+      <div class="badge"><span class="label">Speed</span><span class="value" id="speed">110ms</span></div>
       <button id="startBtn">Start</button>
     </div>
     <div id="dpad">
@@ -120,6 +121,7 @@
       const highEl = document.getElementById("high");
       const lengthEl = document.getElementById("length");
       const lastEl = document.getElementById("last");
+      const speedEl = document.getElementById("speed");
       const startBtn = document.getElementById("startBtn");
       const modeSelect = document.getElementById("modeSelect");
       const dpadButtons = document.querySelectorAll(".btn[data-dir]");
@@ -278,6 +280,7 @@
         paused = false;
         reset();
         draw();
+        speedEl.textContent = `${speedMs}ms`;
         loopId = setInterval(tick, speedMs);
         startBtn.textContent = "Restart";
       };
@@ -331,6 +334,7 @@
         currentMode = modeSelect.value;
         localStorage.setItem(MODE_KEY, currentMode);
         speedMs = difficulties[currentMode]?.speed || difficulties.classic.speed;
+        speedEl.textContent = `${speedMs}ms`;
         if (loopId) {
           clearInterval(loopId);
           loopId = setInterval(tick, speedMs);
@@ -346,6 +350,7 @@
       // Init
       resize();
       reset();
+      speedEl.textContent = `${speedMs}ms`;
       draw();
     })();
   </script>
