@@ -211,6 +211,7 @@
         if (head.x === food.x && head.y === food.y) {
           score += 10;
           scoreEl.textContent = score;
+          if ("vibrate" in navigator) navigator.vibrate(40);
           if (score > highScore) {
             highScore = score;
             highEl.textContent = highScore;
