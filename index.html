@@ -230,6 +230,7 @@
         statusEl.textContent = status;
       };
 
+      // Resize the canvas and recalculate grid size
       const resize = () => {
         const w = window.innerWidth;
         const h = window.innerHeight;
@@ -240,8 +241,10 @@
         rows = Math.max(12, Math.floor(h / cellSize));
       };
 
+      // Generate a random integer from 0 to max-1
       const randInt = (max) => Math.floor(Math.random() * max);
 
+      // Place food in a random empty cell
       const placeFood = () => {
         const openCells = [];
         for (let x = 0; x < cols; x++) {
@@ -258,6 +261,7 @@
         return true;
       };
 
+      // Reset the game state to start a new game
       const reset = () => {
         resize();
         const cx = Math.floor(cols / 2);
@@ -276,11 +280,13 @@
         setStatus("Ready");
       };
 
+      // Set the next direction for the snake
       const setDirection = (x, y) => {
         if (x === -dir.x && y === -dir.y) return; // prevent 180 turn
         nextDir = { x, y };
       };
 
+      // Main game loop tick: move snake, check collisions, update state
       const tick = () => {
         if (paused) return;
         dir = { ...nextDir };
@@ -325,6 +331,7 @@
         draw();
       };
 
+      // Toggle pause/resume state
       const togglePause = () => {
         paused = !paused;
         startBtn.textContent = paused ? "Resume" : "Restart";
@@ -332,6 +339,7 @@
         draw();
       };
 
+      // Draw the game state (grid, snake, food, overlays)
       const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -389,6 +397,7 @@
         }
       };
 
+      // Start or restart the game
       const start = () => {
         clearInterval(loopId);
         speedMs = difficulties[currentMode]?.speed || difficulties.classic.speed;
@@ -401,6 +410,7 @@
         startBtn.textContent = "Restart";
       };
 
+      // Handle game over state and display overlay
       const gameOver = (title, subtitle) => {
         clearInterval(loopId);
         loopId = null;
@@ -436,6 +446,7 @@
         else if (k === "arrowright" || k === "d") setDirection(1, 0);
       });
 
+      // Handle D-pad and swipe input
       const touchHandler = (dir) => {
         switch (dir) {
           case "up": setDirection(0, -1); break;
@@ -445,6 +456,7 @@
         }
       };
 
+      // Handle swipe gesture for direction change
       const handleSwipe = (endX, endY) => {
         if (!swipeStart) return;
         const deltaX = endX - swipeStart.x;
