@@ -213,15 +213,17 @@
       let currentMode = modeSelect.value;
       let currentArena = arenaSelect.value;
 
-      let cellSize = 20, cols = 24, rows = 32;
-      let snake = [];
-      let dir = { x: 1, y: 0 };
-      let nextDir = { x: 1, y: 0 };
-      let food = { x: 0, y: 0 };
-      let score = 0;
-      let loopId = null;
-      let speedMs = difficulties[currentMode].speed;
-      let paused = false;
+      let cellSize = 20;
+      let gridCols = 24;
+      let gridRows = 32;
+      let snakeBody = [];
+      let snakeDir = { x: 1, y: 0 };
+      let nextSnakeDir = { x: 1, y: 0 };
+      let foodPos = { x: 0, y: 0 };
+      let currentScore = 0;
+      let gameLoopId = null;
+      let currentSpeedMs = difficulties[currentMode].speed;
+      let isPaused = false;
       let swipeStart = null;
 
       const setStatus = (status) => {
