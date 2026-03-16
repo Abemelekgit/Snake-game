@@ -40,6 +40,7 @@
       display: flex; justify-content: space-between; align-items: center; gap: 12px;
       background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%);
       pointer-events: none;
+      flex-wrap: wrap;
     }
     .badge {
       pointer-events: auto;
@@ -80,6 +81,46 @@
     .btn.pressed { background: rgba(38,255,230,0.25); box-shadow: 0 0 12px rgba(122,252,255,0.7); }
     .btn span { font-size: 18px; }
     .hidden { display: none; }
+    #tips {
+      position: absolute;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 12px) + 12px);
+      transform: translateX(-50%);
+      width: min(92vw, 640px);
+      padding: 12px 16px;
+      border: 1px solid rgba(38, 255, 230, 0.28);
+      border-radius: 14px;
+      background: rgba(8, 14, 30, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--glow);
+      color: #d6f8ff;
+      text-align: center;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      pointer-events: none;
+    }
+    #tips strong {
+      color: #7afcff;
+    }
+    @media (max-width: 720px) {
+      #overlay {
+        justify-content: center;
+      }
+      .badge,
+      #startBtn,
+      select {
+        font-size: 14px;
+      }
+      .dpad-grid {
+        width: 180px;
+        height: 180px;
+      }
+      #tips {
+        font-size: 13px;
+        bottom: calc(env(safe-area-inset-bottom, 10px) + 10px);
+      }
+    }
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.08); }
@@ -93,6 +134,7 @@
   <div id="game">
     <canvas id="canvas"></canvas>
     <div id="overlay">
+      <div class="badge"><span class="label">Status</span><span class="value" id="status">Ready</span></div>
       <div class="badge"><span class="label">Score</span><span class="value" id="score">0</span></div>
       <div class="badge"><span class="label">High</span><span class="value" id="high">0</span></div>
       <div class="badge"><span class="label">Length</span><span class="value" id="length">3</span></div>
@@ -103,6 +145,13 @@
           <option value="chill">Chill</option>
           <option value="classic" selected>Classic</option>
           <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div class="badge">
+        <span class="label">Arena</span>
+        <select id="arenaSelect">
+          <option value="solid" selected>Walls</option>
+          <option value="wrap">Wrap</option>
         </select>
       </div>
       <div class="badge"><span class="label">Speed</span><span class="value" id="speed">110ms</span></div>
@@ -121,12 +170,14 @@
         <div></div>
       </div>
     </div>
+    <div id="tips"><strong>Controls:</strong> swipe, use the D-pad, or press arrow keys/WASD. <strong>Space</strong> pauses and <strong>Enter</strong> restarts.</div>
   </div>
 
   <script>
     (() => {
       const canvas = document.getElementById("canvas");
       const ctx = canvas.getContext("2d");
+      const statusEl = document.getElementById("status");
       const scoreEl = document.getElementById("score");
       const highEl = document.getElementById("high");
       const lengthEl = document.getElementById("length");
@@ -134,9 +185,11 @@
       const speedEl = document.getElementById("speed");
       const startBtn = document.getElementById("startBtn");
       const modeSelect = document.getElementById("modeSelect");
+      const arenaSelect = document.getElementById("arenaSelect");
       const dpadButtons = document.querySelectorAll(".btn[data-dir]");
       const HIGH_KEY = "snake_highscore";
       const MODE_KEY = "snake_mode";
+      const ARENA_KEY = "snake_arena";
       let highScore = parseInt(localStorage.getItem(HIGH_KEY) || "0", 10);
       highEl.textContent = highScore;
 
@@ -149,7 +202,16 @@
       if (savedMode && difficulties[savedMode]) {
         modeSelect.value = savedMode;
       }
+      const arenaModes = {
+        solid: { label: "Walls" },
+        wrap: { label: "Wrap" }
+      };
+      const savedArena = localStorage.getItem(ARENA_KEY);
+      if (savedArena && arenaModes[savedArena]) {
+        arenaSelect.value = savedArena;
+      }
       let currentMode = modeSelect.value;
+      let currentArena = arenaSelect.value;
 
       let cellSize = 20, cols = 24, rows = 32;
       let snake = [];
@@ -160,6 +222,11 @@
       let loopId = null;
       let speedMs = difficulties[currentMode].speed;
       let paused = false;
+      let swipeStart = null;
+
+      const setStatus = (status) => {
+        statusEl.textContent = status;
+      };
 
       const resize = () => {
         const w = window.innerWidth;
@@ -174,13 +241,19 @@
       const randInt = (max) => Math.floor(Math.random() * max);
 
       const placeFood = () => {
-        let fx, fy, safe = false;
-        while (!safe) {
-          fx = randInt(cols);
-          fy = randInt(rows);
-          safe = !snake.some(s => s.x === fx && s.y === fy);
+        const openCells = [];
+        for (let x = 0; x < cols; x++) {
+          for (let y = 0; y < rows; y++) {
+            if (!snake.some(segment => segment.x === x && segment.y === y)) {
+              openCells.push({ x, y });
+            }
+          }
         }
-        food = { x: fx, y: fy };
+        if (!openCells.length) {
+          return false;
+        }
+        food = openCells[randInt(openCells.length)];
+        return true;
       };
 
       const reset = () => {
@@ -198,6 +271,7 @@
         scoreEl.textContent = score;
         lengthEl.textContent = snake.length;
         placeFood();
+        setStatus("Ready");
       };
 
       const setDirection = (x, y) => {
@@ -210,10 +284,15 @@
         dir = { ...nextDir };
         const head = { x: snake[snake.length - 1].x + dir.x, y: snake[snake.length - 1].y + dir.y };
 
+        if (currentArena === "wrap") {
+          head.x = (head.x + cols) % cols;
+          head.y = (head.y + rows) % rows;
+        }
+
         // collisions
-        if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows ||
+        if ((currentArena === "solid" && (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows)) ||
             snake.some(s => s.x === head.x && s.y === head.y)) {
-          gameOver();
+          gameOver("Game Over", "Press Start or Enter to try again");
           return;
         }
 
@@ -233,7 +312,10 @@
             void highEl.offsetWidth;
             highEl.classList.add("highlight");
           }
-          placeFood();
+          if (!placeFood()) {
+            gameOver("Board Cleared", "You filled every cell");
+            return;
+          }
         } else {
           snake.shift();
         }
@@ -244,6 +326,7 @@
       const togglePause = () => {
         paused = !paused;
         startBtn.textContent = paused ? "Resume" : "Restart";
+        setStatus(paused ? "Paused" : "Running");
         draw();
       };
 
@@ -309,22 +392,28 @@
         speedMs = difficulties[currentMode]?.speed || difficulties.classic.speed;
         paused = false;
         reset();
+        setStatus("Running");
         draw();
         speedEl.textContent = `${speedMs}ms`;
         loopId = setInterval(tick, speedMs);
         startBtn.textContent = "Restart";
       };
 
-      const gameOver = () => {
+      const gameOver = (title, subtitle) => {
         clearInterval(loopId);
+        loopId = null;
         lastEl.textContent = score;
         startBtn.textContent = "Start";
+        setStatus(title);
         ctx.fillStyle = "rgba(0,0,0,0.45)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#7afcff";
         ctx.font = "24px " + getComputedStyle(document.body).fontFamily;
         ctx.textAlign = "center";
-        ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+        ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 6);
+        ctx.font = "14px " + getComputedStyle(document.body).fontFamily;
+        ctx.fillStyle = "#d6f8ff";
+        ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 24);
       };
 
       // Input
@@ -354,6 +443,23 @@
         }
       };
 
+      const handleSwipe = (endX, endY) => {
+        if (!swipeStart) return;
+        const deltaX = endX - swipeStart.x;
+        const deltaY = endY - swipeStart.y;
+        const threshold = Math.max(24, cellSize);
+        if (Math.abs(deltaX) < threshold && Math.abs(deltaY) < threshold) {
+          swipeStart = null;
+          return;
+        }
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          setDirection(deltaX > 0 ? 1 : -1, 0);
+        } else {
+          setDirection(0, deltaY > 0 ? 1 : -1);
+        }
+        swipeStart = null;
+      };
+
       dpadButtons.forEach(btn => {
         const dir = btn.dataset.dir;
         ["touchstart", "pointerdown"].forEach(ev => {
@@ -366,6 +472,16 @@
         });
       });
 
+      canvas.addEventListener("pointerdown", (e) => {
+        swipeStart = { x: e.clientX, y: e.clientY };
+      });
+      canvas.addEventListener("pointerup", (e) => {
+        handleSwipe(e.clientX, e.clientY);
+      });
+      canvas.addEventListener("pointercancel", () => {
+        swipeStart = null;
+      });
+
       modeSelect.addEventListener("change", () => {
         currentMode = modeSelect.value;
         localStorage.setItem(MODE_KEY, currentMode);
@@ -375,6 +491,12 @@
           clearInterval(loopId);
           loopId = setInterval(tick, speedMs);
         }
+      });
+
+      arenaSelect.addEventListener("change", () => {
+        currentArena = arenaSelect.value;
+        localStorage.setItem(ARENA_KEY, currentArena);
+        draw();
       });
 
       startBtn.addEventListener("click", () => {

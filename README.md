@@ -5,8 +5,11 @@ A mobile-optimized Snake game with a cyberpunk look, touch D-pad, and persistent
 ## Features
 - Fullscreen canvas that auto-resizes to device size
 - Touch D-pad for Android thumbs + keyboard arrows/WASD
+- Swipe controls directly on the playfield
 - Difficulty modes: Chill, Classic, Hard (speed changes live)
+- Arena modes: solid walls or wrap-around edges
 - LocalStorage high score, snake growth, wall/self collision
+- Status badge and improved game-over messaging
 - Dark neon UI with Start/Restart overlay
 
 ## Quick Start (web)
@@ -34,6 +37,10 @@ In Android Studio, build and run on a device/emulator. Set `android:usesCleartex
 
 ## Difficulty
  - Remembers last selected mode across sessions
+
+## Arena Modes
+- Walls: hitting a boundary ends the run
+- Wrap: exiting one side of the screen re-enters from the opposite side
 
 ## Files
 - `index.html` — all game code (HTML/CSS/JS)
